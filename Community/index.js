@@ -1,13 +1,8 @@
 const boardCookie = document.cookie.match(/(^| )boardCookie=([^;]+)/)?.[2];  
 let boardData = boardCookie ? JSON.parse(decodeURIComponent(boardCookie)) : [
-    { "id": "20241214174555", "date": "2024-12-14 17:45", "title": "영화 한 편", "content": "퇴근 후 영화를 하나 봤습니다.<br>감동적이었어요." },
-    { "id": "20241214173012", "date": "2024-12-14 17:30", "title": "저녁 준비", "content": "오늘은 간단히 떡볶이를 만들어 먹었습니다.<br>너무 맛있었어요." },
-    { "id": "20241214171038", "date": "2024-12-14 17:10", "title": "친구와의 대화", "content": "오랜만에 친구와 전화로 긴 대화를 나눴습니다.<br>너무 반가웠어요." },
-    { "id": "20241214170054", "date": "2024-12-14 17:00", "title": "운동 시작", "content": "오늘부터 헬스장에 등록했습니다.<br>열심히 운동해야겠어요!" },
-    { "id": "20241214164523", "date": "2024-12-14 16:45", "title": "하늘을 바라보며", "content": "퇴근 후 하늘을 보며 산책했습니다.<br>날씨가 좋아서 기분이 좋았어요." },
-    { "id": "20241214163045", "date": "2024-12-14 16:30", "title": "맛있는 점심", "content": "오늘은 동료들과 맛있는 피자를 먹었습니다.<br>정말 맛있었어요." },
-    { "id": "20241214162200", "date": "2024-12-14 16:22", "title": "새로운 시작", "content": "오늘부터 새로운 프로젝트가 시작됩니다.<br>기대가 됩니다." },
-    { "id": "20241214163512", "date": "2024-12-14 16:35", "title": "책 한 권", "content": "새로운 책을 샀습니다.<br>이번 주말에는 시간을 내서 읽어야겠어요." }
+    { "id": "20241214174555", "date": "2024-12-14 17:45", "title": "영화 한 편", "content": "퇴근 후 영화를 하나 봤습니다.<br>감동적이었어요.", comment: ["안녕하세요"] },
+    { "id": "20241214164523", "date": "2024-12-14 16:45", "title": "하늘을 바라보며", "content": "퇴근 후 하늘을 보며 산책했습니다.<br>날씨가 좋아서 기분이 좋았어요.", comment: ["굿", "^^"]  },
+    { "id": "20241214163512", "date": "2024-12-14 16:35", "title": "책 한 권", "content": "새로운 책을 샀습니다.<br>이번 주말에는 시간을 내서 읽어야겠어요.", comment: ["화이팅"]  }
 ]
 
 
@@ -38,11 +33,11 @@ function createBoard(){
 }
 
 
-function createDetailBoard(nid){
+function createDetailBoard(id){
     createBoard() // 초기화
     window.scrollTo(0, 0);
 
-    const detailData = boardData.find(b => b.id == nid)
+    const detailData = boardData.find(b => b.id == id)
     document.querySelector("#boardDetail").style.display = "block"
     document.querySelector("#boardDetail").innerHTML=`
         <div id="detailTitle">
@@ -55,6 +50,13 @@ function createDetailBoard(nid){
         <div id="detailContent">
             ${detailData.content}
         </div>
+        <div id="detailComment">
+            <b>댓글</b>
+            ${detailData.comment.map(d => `<span class="comment">${d}</span>`).join("")}
+
+            <textarea placeholder="댓긓을 입력해주세요"></textarea>
+            <div> <button onclick="writeComment(${detailData.id})">작성</button> </div>
+        </div>
     `;
 }
 
@@ -66,9 +68,17 @@ function writeBoard(){
 }
 
 
-function openBoard(id){
-    window.location.search = `?nid=${id}`;
+function writeComment(id){
+    const comment = document.querySelector("#detailComment textarea").value;
+    if(!comment){ alert("댓글을 작성해주세요"); return; }
+
+    boardData.find(b => b.id == id).comment.push(comment)
+    console.log(boardData)
+    document.cookie = `boardCookie=${encodeURIComponent(JSON.stringify(boardData))};`;
+    createDetailBoard(id)
 }
+
+
 
 
 function searchBoard(event=null){
@@ -106,12 +116,11 @@ function saveBoard(){
         return;
     }
 
-    boardData.push({id, date, title, content: content.replace(/\n/g, '<br>')})
+    boardData.push({id, date, title, content: content.replace(/\n/g, '<br>'), comment: []})
     document.cookie = `boardCookie=${encodeURIComponent(JSON.stringify(boardData))};`;
 
     // board 새로고침
-    createBoard()
-    document.querySelector('#simpleModal').style.display = 'none'
+    window.location.reload();
 }
 
 
