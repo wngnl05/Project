@@ -54,7 +54,7 @@ header button {
 
 
 main {
-    height: 100vh;
+    min-height: 100vh;
     margin: 40px 20%;
 }
 
